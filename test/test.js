@@ -141,6 +141,34 @@ async.waterfall([
         })
     },
 
+    // delete user
+    function(callback){
+        sqlLogin.deleteUser('foo@email.com', function(err, response){
+            if( err ){
+                callback(err);
+                return;
+            }
+            // assert((response.status === 'success'), 'Update password verification failed')
+            callback()
+        })
+    },
+
+    // try to login deleted user
+    function(callback){
+        sqlLogin.checkPassword({
+            email: 'foo@email.com',
+            password: 'asdfasdf'
+        }, function(err, response){
+            if( err ){
+                callback(err);
+                return;
+            }
+            assert((response.status === 'failure'), 'Should not log in deleted user')
+            assert((response.code === '2'), 'Should not log in deleted user')
+            callback()
+        })
+    },
+
 ], function(err){
     if( err ){
         console.log(err);
