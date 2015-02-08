@@ -1,0 +1,25 @@
+{
+  "name": "user_log",
+  "version": "1.0.0",
+  "description": "Simple authentication and session manager using Redis for session and SQL (Knex compatible) for log.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danpaul/user_log.git"
+  },
+  "author": "Dan Breczinski",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danpaul/user_log/issues"
+  },
+  "homepage": "https://github.com/danpaul/user_log",
+  "dependencies": {
+    "async": "^0.9.0",
+    "knex": "^0.7.3",
+    "passport": "^0.2.1",
+    "underscore": "^1.7.0"
+  }
+}
