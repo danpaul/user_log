@@ -1,7 +1,7 @@
 {
   "name": "user_log",
   "version": "1.0.0",
-  "description": "Simple authentication and session manager using Redis for session and SQL (Knex compatible) for log.",
+  "description": "Simple Node logging app for recording which posts (or whatever) user has viewed.",
   "main": "index.js",
   "scripts": {
     "test": "node test/test.js"
