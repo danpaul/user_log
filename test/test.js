@@ -1,9 +1,7 @@
-(function(){
-
-var knex = require('knex')
 var async = require('async')
-var SqlLogin = require('../lib/sql_login')
 var assert = require('assert')
+
+var UserLog = require('../index')
 
 var dbCreds = {
     client: 'mysql',
@@ -17,166 +15,45 @@ var dbCreds = {
 }
 
 var knex = require('knex')(dbCreds)
-var sqlLogin;
 
-async.waterfall([
+userId = 1
 
-    // initialize sqlLogin
-    function(callback){
-        sqlLogin = new SqlLogin({
-            'knex': knex,
-            'tableName': 'user_test'
-        }, callback)
-    },
+var userLog = new UserLog({
+    knex: knex,
+    tableName: 'test_user_log'
+}, function(){});
+
+async.waterfall([    
 
     // clear table
     function(callback){
-        knex('user_test').truncate()
+        knex('test_user_log').truncate()
             .then(function(){ callback(); })
             .catch(callback)
     },
 
-    // create user
+    // create a log entry
     function(callback){
-        sqlLogin.create({
-            email: 'foo@email.com',
-            password: 'asdfasdf'
-        }, function(err, response){
-            if( err ){
-                callback(err)
-                return;
-            }
-            assert((response.status === 'success'), 'Unable to create user');
-            callback();
-        })
+        userLog.log(userId, 777, callback)
     },
 
-    // try to recreate same user
+    // get user log
     function(callback){
-        sqlLogin.create({
-            email: 'foo@email.com',
-            password: 'asdfasdf'
-        }, function(err, response){
-            if( err ){
-                callback(err)
-                return;
+        userLog.getLog(userId, function(err, log){
+            if( err ){ callback(err)
+            } else {
+                assert((log[0] === 777), 'Log not entered.')
             }
-            assert((response.status === 'failure'), 'User creation should have failed');
-            callback();
         })
-    },
+    }
 
-    // check password
-    function(callback){
-        sqlLogin.checkPassword({
-            email: 'foo@email.com',
-            password: 'asdfasdf'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'success'), 'Password verification failed')
-            callback()
-        })
-    },
-
-    // try to login with bad password
-    function(callback){
-        sqlLogin.checkPassword({
-            email: 'foo@email.com',
-            password: 'asdfasdfX'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'failure'), 'Bad password allowed to login')
-            callback()
-        })
-    },
-
-    // try to login with bad email
-    function(callback){
-        sqlLogin.checkPassword({
-            email: 'foo@email.comX',
-            password: 'asdfasdf'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'failure'), 'Bad email allowed to login')
-            callback()
-        })
-    },
-
-    // update password
-    function(callback){
-        sqlLogin.updatePassword({
-            email: 'foo@email.com',
-            password: 'fdsafdsa'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'success'), 'Password should have been updated')
-            callback()
-        })
-    },
-
-    // check new password
-    function(callback){
-        sqlLogin.checkPassword({
-            email: 'foo@email.com',
-            password: 'fdsafdsa'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'success'), 'Update password verification failed')
-            callback()
-        })
-    },
-
-    // delete user
-    function(callback){
-        sqlLogin.deleteUser('foo@email.com', function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            // assert((response.status === 'success'), 'Update password verification failed')
-            callback()
-        })
-    },
-
-    // try to login deleted user
-    function(callback){
-        sqlLogin.checkPassword({
-            email: 'foo@email.com',
-            password: 'asdfasdf'
-        }, function(err, response){
-            if( err ){
-                callback(err);
-                return;
-            }
-            assert((response.status === 'failure'), 'Should not log in deleted user')
-            assert((response.code === '2'), 'Should not log in deleted user')
-            callback()
-        })
-    },
 
 ], function(err){
     if( err ){
-        console.log(err);
-        return;
+        console.log('Error occured.')
+        console.log(err)
+    } else {
+        console.log('User log test completed successfully.')
     }
-    console.log('Sql Login tests passed.')
 
 })
-
-
-}())
